@@ -54,9 +54,6 @@ def convert_to_markdown(string):
         if line.lstrip(' ').startswith('```'):
             is_code = not is_code
 
-        if is_code:
-            line = html.unescape(line)
-
         result += line
         if is_code or line.startswith('|'):  # Don't add an extra \n for tables or code
             result += '\n'
@@ -85,11 +82,14 @@ def convert_to_markdown(string):
     else:
         html_output = markdown.markdown(result, extensions=['fenced_code', 'tables'])
 
+    # Unescape code blocks
+    pattern = re.compile(r'<code[^>]*>(.*?)</code>', re.DOTALL)
+    html_output = pattern.sub(lambda x: html.unescape(x.group()), html_output)
+
     return html_output
 
 
 def generate_basic_html(string):
-    string = html.escape(string)
     string = convert_to_markdown(string)
     string = f'<style>{readable_css}</style><div class="container">{string}</div>'
     return string

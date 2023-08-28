@@ -22,8 +22,8 @@ def create_ui():
 
     with gr.Tab('Chat', elem_id='chat-tab'):
         shared.gradio['display'] = gr.HTML(value=chat_html_wrapper({'internal': [], 'visible': []}, shared.settings['name1'], shared.settings['name2'], 'chat', 'cai-chat'))
-        shared.gradio['textbox'] = gr.Textbox(label='Input', elem_id='chat-input')
-        shared.gradio['show_controls'] = gr.Checkbox(value=shared.settings['show_controls'], label='Show controls', elem_id='show-controls')
+        shared.gradio['textbox'] = gr.Textbox(label='', placeholder='Send a message', elem_id='chat-input')
+        shared.gradio['show_controls'] = gr.Checkbox(value=shared.settings['show_controls'], label='Show controls (Ctrl+S)', elem_id='show-controls')
 
         with gr.Row():
             shared.gradio['Stop'] = gr.Button('Stop', elem_id='stop')
@@ -45,6 +45,10 @@ def create_ui():
             shared.gradio['Clear history'] = gr.Button('Clear history')
             shared.gradio['Clear history-confirm'] = gr.Button('Confirm', variant='stop', visible=False)
             shared.gradio['Clear history-cancel'] = gr.Button('Cancel', visible=False)
+
+        with gr.Row():
+            shared.gradio['send-chat-to-default'] = gr.Button('Send to default')
+            shared.gradio['send-chat-to-notebook'] = gr.Button('Send to notebook')
 
         with gr.Row():
             shared.gradio['start_with'] = gr.Textbox(label='Start reply with', placeholder='Sure thing!', value=shared.settings['start_with'])
@@ -274,5 +278,15 @@ def create_event_handlers():
     shared.gradio['send_instruction_to_negative_prompt'].click(
         prompts.load_instruction_prompt_simple, gradio('instruction_template'), gradio('negative_prompt')).then(
         lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_generation_parameters()}}')
+
+    shared.gradio['send-chat-to-default'].click(
+        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
+        partial(chat.generate_chat_prompt, '', _continue=True), gradio('interface_state'), gradio('textbox-default')).then(
+        lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_default()}}')
+
+    shared.gradio['send-chat-to-notebook'].click(
+        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
+        partial(chat.generate_chat_prompt, '', _continue=True), gradio('interface_state'), gradio('textbox-notebook')).then(
+        lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_notebook()}}')
 
     shared.gradio['show_controls'].change(None, gradio('show_controls'), None, _js=f'(x) => {{{ui.show_controls_js}; toggle_controls(x)}}')

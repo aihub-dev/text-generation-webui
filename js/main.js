@@ -1,36 +1,37 @@
-let chat_tab = document.getElementById('chat-tab');
-let notebook_tab = document.getElementById('notebook-tab');
-let default_tab = document.getElementById('default-tab');
-
-let main_parent = chat_tab.parentNode;
+let main_parent = document.getElementById('chat-tab').parentNode;
 let extensions = document.getElementById('extensions');
 
 main_parent.childNodes[0].classList.add("header_bar");
 main_parent.style = "padding: 0; margin: 0";
 main_parent.parentNode.parentNode.style = "padding: 0";
 
-// Add an event listener to the generation tabs
-main_parent.addEventListener('click', function(e) {
-    let chat_visible = (chat_tab.offsetHeight > 0 && chat_tab.offsetWidth > 0);
-    let notebook_visible = (notebook_tab.offsetHeight > 0 && notebook_tab.offsetWidth > 0);
-    let default_visible = (default_tab.offsetHeight > 0 && default_tab.offsetWidth > 0);
+document.querySelector('.header_bar').addEventListener('click', function(event) {
+    if (event.target.tagName === 'BUTTON') {
+        const buttonText = event.target.textContent.trim();
 
-    // Check if one of the generation tabs is visible
-    if (chat_visible || notebook_visible || default_visible) {
-        extensions.style.display = 'flex';
-        if (chat_visible) {
-            extensions.style.maxWidth = "800px";
-            extensions.style.padding = "0px";
+        let chat_visible = (buttonText == 'Chat');
+        let default_visible = (buttonText == 'Default');
+        let notebook_visible = (buttonText == 'Notebook');
+
+        // Check if one of the generation tabs is visible
+        if (chat_visible || notebook_visible || default_visible) {
+            extensions.style.display = 'flex';
+            if (chat_visible) {
+                extensions.style.maxWidth = "800px";
+                extensions.style.padding = "0px";
+            } else {
+                extensions.style.maxWidth = "none";
+                extensions.style.padding = "15px";
+            }
         } else {
-            extensions.style.maxWidth = "none";
-            extensions.style.padding = "15px";
+            extensions.style.display = 'none';
         }
-    } else {
-        extensions.style.display = 'none';
     }
 });
 
+//------------------------------------------------
 // Add some scrollbars
+//------------------------------------------------
 const textareaElements = document.querySelectorAll('.add_scrollbar textarea');
 for(i = 0; i < textareaElements.length; i++) {
     textareaElements[i].classList.remove('scroll-hide');
@@ -38,8 +39,12 @@ for(i = 0; i < textareaElements.length; i++) {
     textareaElements[i].style.resize = "none";
 }
 
-// Stop generation on Esc pressed
+//------------------------------------------------
+// Keyboard shortcuts
+//------------------------------------------------
 document.addEventListener("keydown", function(event) {
+
+  // Stop generation on Esc pressed
   if (event.key === "Escape") {
     // Find the element with id 'stop' and click it
     var stopButton = document.getElementById("stop");
@@ -47,15 +52,32 @@ document.addEventListener("keydown", function(event) {
       stopButton.click();
     }
   }
+
+  // Show chat controls on Ctrl+S pressed
+  else if (event.ctrlKey && event.key == "s") {
+    event.preventDefault();
+
+    var showControlsElement = document.getElementById('show-controls');
+    if (showControlsElement && showControlsElement.childNodes.length >= 4) {
+      showControlsElement.childNodes[3].click();
+
+      var arr = document.getElementById('chat-input').childNodes[2].childNodes;
+      arr[arr.length - 1].focus();
+    }
+  }
+
 });
 
+//------------------------------------------------
 // Chat scrolling
+//------------------------------------------------
 const targetElement = document.getElementById('chat').parentNode.parentNode.parentNode;
 
 // Create a MutationObserver instance
 const observer = new MutationObserver(function(mutations) {
   mutations.forEach(function(mutation) {
-    let childElement = targetElement.childNodes[2].childNodes[0].childNodes[1];
+    let nodes = targetElement.childNodes[2].childNodes[0].childNodes;
+    let childElement = nodes[nodes.length - 1];
     childElement.scrollTop = childElement.scrollHeight;
   });
 });
@@ -71,3 +93,18 @@ const config = {
 
 // Start observing the target element
 observer.observe(targetElement, config);
+
+//------------------------------------------------
+// Improve the looks of the chat input field
+//------------------------------------------------
+document.getElementById('chat-input').parentNode.style.background = 'transparent';
+document.getElementById('chat-input').parentNode.style.border = 'none';
+
+//------------------------------------------------
+// Remove some backgrounds
+//------------------------------------------------
+const noBackgroundelements = document.querySelectorAll('.no-background');
+for(i = 0; i < noBackgroundelements.length; i++) {
+    noBackgroundelements[i].parentNode.style.border = 'none';
+    noBackgroundelements[i].parentNode.parentNode.parentNode.style.alignItems = 'center';
+}

@@ -63,12 +63,15 @@ def list_model_elements():
         'no_inject_fused_mlp',
         'no_use_cuda_fp16',
         'disable_exllama',
+        'cfg_cache',
         'threads',
         'n_batch',
         'no_mmap',
         'low_vram',
         'mlock',
+        'mul_mat_q',
         'n_gpu_layers',
+        'tensor_split',
         'n_ctx',
         'n_gqa',
         'rms_norm_eps',
@@ -76,7 +79,8 @@ def list_model_elements():
         'gpu_split',
         'max_seq_len',
         'compress_pos_emb',
-        'alpha_value'
+        'alpha_value',
+        'rope_freq_base'
     ]
 
     for i in range(torch.cuda.device_count()):
